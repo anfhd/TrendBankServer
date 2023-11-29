@@ -14,6 +14,7 @@ builder.Services.AddScoped<ILoggerManager, LoggerManager>();
 builder.Services.AddDbContext<RepositoryContext>(
     opts => opts.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection")));
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+builder.Services.AddAutoMapper(typeof(Program));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using TrendBankServer.Models.DataTransferObjects;
 using TrendBankServer.Repository;
 
 namespace TrendBankServer.Controllers
@@ -11,10 +13,12 @@ namespace TrendBankServer.Controllers
     {
         private readonly IRepositoryManager _repository;
         private readonly ILoggerManager _logger;
-        public UsersController(IRepositoryManager repository, ILoggerManager logger)
+        private readonly IMapper _mapper;
+        public UsersController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper)
         {
             _repository = repository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -23,7 +27,7 @@ namespace TrendBankServer.Controllers
             try
             {
                 var users = _repository.User.GetAllUsers(trackChanges: false);
-                _logger.LogInfo("Got all users");
+                var usersDto = _mapper.Map<IEnumerable<UserDto>>(users);
                 return Ok(users);
             }
             catch (Exception ex)
