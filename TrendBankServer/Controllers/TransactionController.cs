@@ -39,11 +39,11 @@ namespace TrendBankServer.Controllers
                 return NotFound();
             }
             var transactionsFromDb = _repository.Transaction.GetTransactions(cardId, trackChanges: false);
-            var transactionsDto = _mapper.Map<IEnumerable<CardDto>>(transactionsFromDb);
+            var transactionsDto = _mapper.Map<IEnumerable<TransactionDto>>(transactionsFromDb);
             return Ok(transactionsDto);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public IActionResult GetTransactionForCard(Guid userId, Guid cardId, Guid id, bool trackChanges)
         {
             var user = _repository.User.GetUser(userId, trackChanges: false);
@@ -60,8 +60,13 @@ namespace TrendBankServer.Controllers
                 return NotFound();
             }
 
-            var transactionFromDb = _repository.Transaction.GetTransactions(cardId, trackChanges: false);
-            var transactionDto = _mapper.Map<IEnumerable<CardDto>>(transactionFromDb);
+            var transactionDb = _repository.Transaction.GetTransaction(cardId, id, trackChanges: false);
+            if (transactionDb == null)
+            {
+                _logger.LogInfo($"Transaction with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            var transactionDto = _mapper.Map<TransactionDto>(transactionDb);
             return Ok(transactionDto);
         }
     }
