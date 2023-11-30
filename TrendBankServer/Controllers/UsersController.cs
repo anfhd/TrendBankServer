@@ -28,5 +28,22 @@ namespace TrendBankServer.Controllers
             var usersDto = _mapper.Map<IEnumerable<UserDto>>(users);
             return Ok(users);
         }
+
+        [HttpGet("{id}")]
+        public IActionResult GetUser(Guid id)
+        {
+            var user = _repository.User.GetUser(id, trackChanges: false);
+            if (user == null)
+            {
+                _logger.LogInfo($"User with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            else
+            {
+                var userDto = _mapper.Map<UserDto>(user);
+                return Ok(userDto);
+            }
+        }
+
     }
 }

@@ -12,6 +12,10 @@ namespace TrendBankServer.Repository
             .OrderBy(c => c.LastName)
             .ThenBy(c => c.FirstName)
             .ToList();
+
+        public Models.User GetUser(Guid userId, bool trackChanges) =>
+            FindByCondition(c => c.Id.Equals(userId), trackChanges)
+            .SingleOrDefault();
     }
 
 }
