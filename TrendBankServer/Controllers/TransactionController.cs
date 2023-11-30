@@ -43,7 +43,7 @@ namespace TrendBankServer.Controllers
             return Ok(transactionsDto);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetTransactionForCard")]
         public IActionResult GetTransactionForCard(Guid userId, Guid cardId, Guid id, bool trackChanges)
         {
             var user = _repository.User.GetUser(userId, trackChanges: false);
@@ -68,6 +68,45 @@ namespace TrendBankServer.Controllers
             }
             var transactionDto = _mapper.Map<TransactionDto>(transactionDb);
             return Ok(transactionDto);
+        }
+
+        //перевірити чи кардту існує
+        [HttpPost]
+        public IActionResult CreateTransactionForCard(Guid userId, Guid cardId, [FromBody] TransactionForCreationDto transaction)
+        {
+            if (transaction == null)
+            {
+                _logger.LogError("TransactionForCreationDto object sent from client is null.");
+                return BadRequest("TransactionForCreationDto object is null");
+            }
+
+            var card = _repository.Card.GetCardForAll(transaction.CardToId, trackChanges: false);
+            if (card == null)
+            {
+                _logger.LogInfo($"Card with id: {transaction.CardToId} doesn't exist in the database.");
+                return NotFound();
+            }
+
+            var user = _repository.User.GetUser(userId, trackChanges: false);
+            if (user == null)
+            {
+                _logger.LogInfo($"User with id: {userId} doesn't exist in the database.");
+                return NotFound();
+            }
+
+            var card2 = _repository.Card.GetCard(userId, cardId, trackChanges: false);
+            if (card2 == null)
+            {
+                _logger.LogInfo($"Card with id: {cardId} doesn't exist in the database.");
+                return NotFound();
+            }
+
+            var transactionEntity = _mapper.Map<Models.Transaction>(transaction);
+            _repository.Transaction.CreateTransactionForCard(cardId, transactionEntity);
+            _repository.Save();
+            var transactionToReturn = _mapper.Map<TransactionDto>(transactionEntity);
+            return CreatedAtRoute("GetTransactionForCard", new { userId, cardId, id = transactionToReturn.Id }, transactionToReturn);
+
         }
     }
 }

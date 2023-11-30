@@ -12,6 +12,12 @@ namespace TrendBankServer.Repository.Transaction
         public Models.Transaction GetTransaction(Guid cardId, Guid id, bool trackChanges) =>
             FindByCondition(e => e.CardFromId.Equals(cardId) && e.Id.Equals(id), trackChanges)
             .SingleOrDefault();
+
+        public void CreateTransactionForCard(Guid cardId, Models.Transaction transaction)
+        {
+            transaction.CardFromId = cardId;
+            Create(transaction);
+        }
     }
 
 }

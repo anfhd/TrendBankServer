@@ -12,6 +12,8 @@ namespace TrendBankServer
             CreateMap<Models.Transaction, Models.DataTransferObjects.TransactionDto>();
 
             CreateMap<Models.DataTransferObjects.UserForCreationDto, Models.User>();
+            CreateMap<Models.DataTransferObjects.CardForCreationDto, Models.Card>();
+            CreateMap<Models.DataTransferObjects.TransactionForCreationDto, Models.Transaction>();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.Design;
 using TrendBankServer.Models.DataTransferObjects;
 using TrendBankServer.Repository;
 
@@ -34,7 +35,7 @@ namespace TrendBankServer.Controllers
             return Ok(cardsDto);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetCardForUser")]
         public IActionResult GetCardForUser(Guid userId, Guid id)
         {
             var user = _repository.User.GetUser(userId, trackChanges: false);
@@ -52,6 +53,30 @@ namespace TrendBankServer.Controllers
             }
             var card = _mapper.Map<CardDto>(cardDb);
             return Ok(card);
+        }
+
+        [HttpPost]
+        public IActionResult CreateCardForUser(Guid userId, [FromBody]CardForCreationDto card)
+        {
+            if(card == null)
+            {
+                _logger.LogError("CardForCreationDto object sent from client is null.");
+                return BadRequest("CardForCreationDto object is null");
+            }
+
+            var user = _repository.User.GetUser(userId, trackChanges: false);
+            if(user == null)
+            {
+                _logger.LogInfo($"User with id: {userId} doesn't exist in the database.");
+                return NotFound();
+            }
+
+            var cardEntity = _mapper.Map<Models.Card>(card);
+            _repository.Card.CreateCardForUser(userId, cardEntity);
+            _repository.Save();
+            var cardToReturn = _mapper.Map<CardDto>(cardEntity);
+            return CreatedAtRoute("GetCardForUser", new { userId, id = cardToReturn.Id}, cardToReturn);
+
         }
     }
 
