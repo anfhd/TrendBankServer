@@ -7,9 +7,11 @@ namespace TrendBankServer
     {
         public MappingProfile()
         {
-            CreateMap<TrendBankServer.Models.User, TrendBankServer.Models.DataTransferObjects.UserDto>();
-            CreateMap<TrendBankServer.Models.Card, TrendBankServer.Models.DataTransferObjects.CardDto>();
-            CreateMap<TrendBankServer.Models.Transaction, TrendBankServer.Models.DataTransferObjects.TransactionDto>();
+            CreateMap<Models.User, Models.DataTransferObjects.UserDto>();
+            CreateMap<Models.Card, Models.DataTransferObjects.CardDto>();
+            CreateMap<Models.Transaction, Models.DataTransferObjects.TransactionDto>();
+
+            CreateMap<Models.DataTransferObjects.UserForCreationDto, Models.User>();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace TrendBankServer.Repository
+﻿namespace TrendBankServer.Repository.Card
 {
     public interface ICardRepository
     {

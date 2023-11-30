@@ -29,7 +29,7 @@ namespace TrendBankServer.Controllers
             return Ok(users);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "UserById")]
         public IActionResult GetUser(Guid id)
         {
             var user = _repository.User.GetUser(id, trackChanges: false);
@@ -43,6 +43,24 @@ namespace TrendBankServer.Controllers
                 var userDto = _mapper.Map<UserDto>(user);
                 return Ok(userDto);
             }
+        }
+
+        [HttpPost]
+        public IActionResult CreateUser([FromBody]UserForCreationDto user)
+        {
+            if(user == null)
+            {
+                _logger.LogError("UserForCreationDto object sent from client is null.");
+                return BadRequest("UserForCreationDto object is null.");
+            }
+
+            var userEntity = _mapper.Map<Models.User>(user);
+
+            _repository.User.CreateUser(userEntity);
+            _repository.Save();
+
+            var userToReturn = _mapper.Map<Models.DataTransferObjects.UserDto>(userEntity);
+            return CreatedAtRoute("UserById", new { id = userToReturn.Id }, userToReturn);
         }
 
     }

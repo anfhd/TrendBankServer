@@ -1,4 +1,4 @@
-﻿namespace TrendBankServer.Repository
+﻿namespace TrendBankServer.Repository.Transaction
 {
     public interface ITransactionRepository
     {

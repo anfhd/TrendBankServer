@@ -7,7 +7,7 @@ namespace TrendBankServer.Models
     public class User
     {
         [Column("UserId")]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required(ErrorMessage = "First name is a required field.")]
         [MaxLength(50, ErrorMessage = "Maximum length for the first name is 50 characters.")]

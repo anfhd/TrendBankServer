@@ -1,6 +1,6 @@
 ﻿using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
-namespace TrendBankServer.Repository
+namespace TrendBankServer.Repository.User
 {
     public class UserRepository : RepositoryBase<Models.User>, IUserRepository
     {
@@ -16,6 +16,9 @@ namespace TrendBankServer.Repository
         public Models.User GetUser(Guid userId, bool trackChanges) =>
             FindByCondition(c => c.Id.Equals(userId), trackChanges)
             .SingleOrDefault();
+
+        public void CreateUser(Models.User user) =>
+            Create(user);
     }
 
 }
