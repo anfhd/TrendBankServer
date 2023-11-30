@@ -70,7 +70,6 @@ namespace TrendBankServer.Controllers
             return Ok(transactionDto);
         }
 
-        //перевірити чи кардту існує
         [HttpPost]
         public IActionResult CreateTransactionForCard(Guid userId, Guid cardId, [FromBody] TransactionForCreationDto transaction)
         {
@@ -80,8 +79,8 @@ namespace TrendBankServer.Controllers
                 return BadRequest("TransactionForCreationDto object is null");
             }
 
-            var card = _repository.Card.GetCardForAll(transaction.CardToId, trackChanges: false);
-            if (card == null)
+            var cardTo = _repository.Card.GetCardForAll(transaction.CardToId, trackChanges: false);
+            if (cardTo == null)
             {
                 _logger.LogInfo($"Card with id: {transaction.CardToId} doesn't exist in the database.");
                 return NotFound();
@@ -94,19 +93,56 @@ namespace TrendBankServer.Controllers
                 return NotFound();
             }
 
-            var card2 = _repository.Card.GetCard(userId, cardId, trackChanges: false);
-            if (card2 == null)
+            var card = _repository.Card.GetCard(userId, cardId, trackChanges: false);
+            if (card == null)
             {
                 _logger.LogInfo($"Card with id: {cardId} doesn't exist in the database.");
                 return NotFound();
             }
 
+            if (card.Balance < transaction.Amount)
+            {
+                return BadRequest($"Card with id: {cardId} doesn't have enough money.");
+            }
+
             var transactionEntity = _mapper.Map<Models.Transaction>(transaction);
             _repository.Transaction.CreateTransactionForCard(cardId, transactionEntity);
+            var cardEntityFrom = _repository.Card.GetCard(userId, cardId, trackChanges: true);
+            cardEntityFrom.Balance = cardEntityFrom.Balance - transaction.Amount;
+
+            var cardEntityTo = _repository.Card.GetCardForAll(transaction.CardToId, trackChanges: true);
+            cardEntityTo.Balance = cardEntityTo.Balance + transaction.Amount;
             _repository.Save();
             var transactionToReturn = _mapper.Map<TransactionDto>(transactionEntity);
             return CreatedAtRoute("GetTransactionForCard", new { userId, cardId, id = transactionToReturn.Id }, transactionToReturn);
+        }
 
+        [HttpDelete("{id}")]
+        public IActionResult DeleteTransactionForCard(Guid userId, Guid cardId, Guid id)
+        {
+            var user = _repository.User.GetUser(userId, trackChanges: false);
+            if (user == null)
+            {
+                _logger.LogInfo($"User with id: {userId} doesn't exist in the database.");
+                return NotFound();
+            }
+
+            var card = _repository.Card.GetCard(userId, cardId, trackChanges: false);
+            if (card == null)
+            {
+                _logger.LogInfo($"Card with id: {cardId} doesn't exist in the database.");
+                return NotFound();
+            }
+
+            var transactionForCard = _repository.Transaction.GetTransaction(cardId, id, trackChanges: false);
+            if (transactionForCard == null)
+            {
+                _logger.LogInfo($"Transaction with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            _repository.Transaction.DeleteTransaction(transactionForCard);
+            _repository.Save();
+            return NoContent();
         }
     }
 }

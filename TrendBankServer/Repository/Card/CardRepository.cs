@@ -25,5 +25,8 @@ namespace TrendBankServer.Repository.Card
             Create(card);
         }
 
+        public void DeleteCard(Models.Card card) =>
+            Delete(card);
+
     }
 }

@@ -18,6 +18,11 @@ namespace TrendBankServer.Repository.Transaction
             transaction.CardFromId = cardId;
             Create(transaction);
         }
+
+        public void DeleteTransaction(Models.Transaction transaction)
+        {
+            Delete(transaction);
+        }
     }
 
 }
