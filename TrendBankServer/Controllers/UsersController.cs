@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.ComponentModel.Design;
 using TrendBankServer.Models.DataTransferObjects;
 using TrendBankServer.Repository;
 
@@ -54,6 +55,13 @@ namespace TrendBankServer.Controllers
                 return BadRequest("UserForCreationDto object is null.");
             }
 
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for the UserForCreationDto object");
+                return UnprocessableEntity(ModelState);
+            }
+
+
             var userEntity = _mapper.Map<Models.User>(user);
 
             _repository.User.CreateUser(userEntity);
@@ -61,6 +69,25 @@ namespace TrendBankServer.Controllers
 
             var userToReturn = _mapper.Map<Models.DataTransferObjects.UserDto>(userEntity);
             return CreatedAtRoute("UserById", new { id = userToReturn.Id }, userToReturn);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateUserForCompany(Guid id, [FromBody]UserForUpdateDto user)
+        {
+            if(user == null)
+            {
+                _logger.LogError("UserForUpdateDto object sent from client is null.");
+                return BadRequest("UserForUpdateDto object is null");
+            }
+            var userEntity = _repository.User.GetUser(id, trackChanges: true);
+            if(userEntity == null)
+            {
+                _logger.LogInfo($"User with id: {id} doesn't exist in the database.");
+                return NotFound();
+            }
+            _mapper.Map(user, userEntity);
+            _repository.Save();
+            return NoContent();
         }
 
     }

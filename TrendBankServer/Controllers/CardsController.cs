@@ -64,6 +64,12 @@ namespace TrendBankServer.Controllers
                 return BadRequest("CardForCreationDto object is null");
             }
 
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid model state for the CardForCreationDto object");
+                return UnprocessableEntity(ModelState);
+            }
+
             var user = _repository.User.GetUser(userId, trackChanges: false);
             if(user == null)
             {
